@@ -1,10 +1,18 @@
 package ar.com.codoacodo.domain;
 
+import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,6 +27,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 public class User {
+	//@JsonIgnore //anotacion de presentacion
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -29,7 +38,16 @@ public class User {
 	@Column(name="password",length = 50)
 	private String password;
 	
-//	@Column(name="alias")
-//	private String alias;
+	@ManyToMany(fetch = FetchType.EAGER)
+	@JoinTable(
+			name = "usuario_roles",
+			joinColumns = @JoinColumn(name="usuario_id"),
+			inverseJoinColumns = @JoinColumn(name="role_id")
+	)
+	
+	private Set<Role> roles;
+//	select * from user u
+//	  inner join usuario_roles ur on ur.usuario_id = u.id
+//	  inner join role r on r.id= ur.role_id
 	
 }
