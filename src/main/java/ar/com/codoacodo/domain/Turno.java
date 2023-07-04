@@ -1,7 +1,7 @@
 package ar.com.codoacodo.domain;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -53,6 +53,6 @@ public class Turno {
 			joinColumns = @JoinColumn(name="turno_id"),
 			inverseJoinColumns = @JoinColumn(name="usuario_id")
 	)	
- 	private List<User> usuarios;
+ 	private Set<User> usuarios;
 	
 }

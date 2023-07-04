@@ -1,7 +1,9 @@
 package ar.com.codoacodo.controllers;
 
-import java.util.Collections;
+import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -11,14 +13,16 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import ar.com.codoacodo.domain.Turno;
-import ar.com.codoacodo.domain.TurnoUsuario;
 import ar.com.codoacodo.domain.User;
+import ar.com.codoacodo.dto.TurnoDTO;
 import ar.com.codoacodo.dto.TurnoRequestDTO;
+import ar.com.codoacodo.dto.TurnoRequestPutDTO;
 import ar.com.codoacodo.dto.TurnoResponseDTO;
 import ar.com.codoacodo.services.TurnoService;
 import ar.com.codoacodo.services.UserService;
@@ -32,13 +36,6 @@ public class TurnoController {
 
     private final TurnoService turnoService;
     private final UserService userService;
-
-//    @GetMapping("/{id}")
-//    public ResponseEntity<TurnoDTO> obtenerTurno(@PathVariable("id") Long id) {
-//        Turno turno = turnoService.buscarTurno(id);
-//        TurnoDTO turnoDTO = convertirTurnoADTO(turno);
-//        return ResponseEntity.ok(turnoDTO);
-//    }
 
     @GetMapping()
     public ResponseEntity<List<Turno>> findAll() {
@@ -68,10 +65,12 @@ public class TurnoController {
 //				.usuarioId(user.getId())
 //	    		.build();
 	    
-        Turno newTurno = Turno.builder()
+	    Set<User> userSet = new HashSet<>();
+	    userSet.add(userTurno);
+		Turno newTurno = Turno.builder()
         		.tipoDocumento(request.getTipoDocumento())
         		.numeroDocumento(request.getNumeroDocumento())
-        		.usuarios(Collections.singletonList(userTurno))
+        		.usuarios(userSet)
         		.build();
         
         
@@ -85,15 +84,26 @@ public class TurnoController {
         return ResponseEntity.ok(response);
     }
 
-//    @PutMapping("/{id}")
-//    public ResponseEntity<TurnoDTO> actualizarTurno(@PathVariable("id") Long id, @RequestBody TurnoDTO turnoDTO) {
-//        Turno turno = convertirDTOATurno(turnoDTO);
-//        turno.setId(id);
-//        Turno turnoActualizado = turnoService.actualizarTurno(turno);
-//        TurnoDTO turnoActualizadoDTO = convertirTurnoADTO(turnoActualizado);
-//        return ResponseEntity.ok(turnoActualizadoDTO);
-//    }
-
+  @PutMapping("/{id}")
+  public ResponseEntity<TurnoRequestPutDTO> actualizarTurno(
+		  @PathVariable(name="id", required = true) Long id,
+		  TurnoRequestPutDTO request
+		  ) {
+	  
+      Turno turno = this.turnoService.buscarTurno(id);
+      if (!turno.getId().equals(request.getId())){
+    	  return ResponseEntity.badRequest().build();
+      }
+      
+      //turno.setFechaAtencion(request.getFechaAtencion());
+      turno.setFechaAtencion(LocalDateTime.now());
+      //
+      this.turnoService.actualizarTurno(turno);
+      
+      return ResponseEntity.ok().build();
+      
+  }
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarTurno(@PathVariable("id") Long id) {
         turnoService.eliminarTurno(id);

@@ -23,9 +23,8 @@ public class TurnoServiceImpl implements TurnoService {
 	}
 
 	@Override
-	public TurnoDTO obtenerTurno(Long id) {
-		// TODO Auto-generated method stub
-		return null;
+	public Turno buscarTurno(Long id) {
+		return this.repository.findById(id).get();
 	}
 
 	@Override
@@ -34,8 +33,8 @@ public class TurnoServiceImpl implements TurnoService {
 	}
 
 	@Override
-	public void actualizarTurno(TurnoDTO turnoDTO) {
-		// TODO Auto-generated method stub
+	public void actualizarTurno(Turno turno) {
+		this.repository.save(turno);
 
 	}
 

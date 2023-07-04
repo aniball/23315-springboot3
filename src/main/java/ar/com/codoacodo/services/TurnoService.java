@@ -6,8 +6,8 @@ import ar.com.codoacodo.dto.TurnoDTO;
 import java.util.List;
 
 public interface TurnoService {
-    TurnoDTO obtenerTurno(Long id);
-    void actualizarTurno(TurnoDTO turnoDTO);
+    public Turno buscarTurno(Long id);
+    void actualizarTurno(Turno turno);
     void eliminarTurno(Long id);
     void registrarAtendido(Long id);
 	void crearTurno(Turno turno);
