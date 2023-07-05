@@ -87,7 +87,7 @@ public class TurnoController {
   @PutMapping("/{id}")
   public ResponseEntity<TurnoRequestPutDTO> actualizarTurno(
 		  @PathVariable(name="id", required = true) Long id,
-		  TurnoRequestPutDTO request
+		  @RequestBody TurnoRequestPutDTO request
 		  ) {
 	  
       Turno turno = this.turnoService.buscarTurno(id);
@@ -95,9 +95,21 @@ public class TurnoController {
     	  return ResponseEntity.badRequest().build();
       }
       
-      //turno.setFechaAtencion(request.getFechaAtencion());
-      turno.setFechaAtencion(LocalDateTime.now());
-      //
+      LocalDateTime fechaAtencion = request.getFechaAtencion();
+      if (fechaAtencion != null) {
+          turno.setFechaAtencion(fechaAtencion);
+      }
+
+      LocalDateTime fechaFinalizacion = request.getFechaFinalizacion();
+      if (fechaFinalizacion != null) {
+          turno.setFechaFinalizacion(fechaFinalizacion);
+      }
+ 
+      LocalDateTime fechaCancelacion = request.getFechaCancelacion();
+      if (fechaCancelacion != null) {
+          turno.setFechaCancelacion(fechaCancelacion);
+      }    
+      
       this.turnoService.actualizarTurno(turno);
       
       return ResponseEntity.ok().build();
