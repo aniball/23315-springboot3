@@ -27,8 +27,7 @@ public class ResourceController {
 	@GetMapping()
 	public ResponseEntity<ListResource> findAll() {
 		
-		/*
-		RestTemplate restTemplate = new RestTemplate();
+		/*RestTemplate restTemplate = new RestTemplate();
 		
 		ResponseEntity<ListResource> response = restTemplate.getForEntity(apiEndpoint, ListResource.class);
 

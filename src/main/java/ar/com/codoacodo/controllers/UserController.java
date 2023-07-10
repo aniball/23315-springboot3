@@ -25,27 +25,47 @@ import ar.com.codoacodo.dto.UserRequestDTO;
 import ar.com.codoacodo.dto.UserRequestPutDTO;
 import ar.com.codoacodo.dto.UserResponseDTO;
 import ar.com.codoacodo.services.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 //http://localhost:8080/user
 
+@Tag(name = "User", description = "User management APIs")
+//@CrossOrigin(origins = "http://localhost:5500")
+
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://127.0.0.1:5500")
 public class UserController {
 
 	//necesito el service
 	private final UserService userService;
-	
-	//GET
-	@GetMapping("/{id}")	
-	public ResponseEntity<UserDTO> m1(
-			@PathVariable("id") Long id
-			) {
-		
+
+	// GET
+	@Operation(
+			summary = "Retrieve a User by Id", 
+			description = "Get a User object by specifying its id. The response is Tutorial object with id, title, description and published status.", 
+			tags = {"users", "get" })
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200", 
+					content = { 
+							@Content(schema = @Schema(implementation = UserDTO.class), 
+									mediaType = "application/json") 
+					}
+			),
+			@ApiResponse(responseCode = "404", content = { @Content(schema = @Schema()) }),
+			@ApiResponse(responseCode = "500", content = { @Content(schema = @Schema()) }) })
+	@GetMapping("/{id}")
+	public ResponseEntity<UserDTO> m1(@PathVariable("id") Long id) {
+
 		User user = this.userService.buscarUser(id);
-		
+
 		UserDTO dto = UserDTO.builder()
 			.id(user.getId())
 			.username(user.getUsername())
@@ -54,29 +74,32 @@ public class UserController {
 					.map(x -> x.getRol())
 					.collect(Collectors.toSet())
 			).build();
-			
-		
+
 		//http status code=200
 		return ResponseEntity.ok(dto);
 	}
 	
-	@CrossOrigin(origins = "http://127.0.0.1:5500")
-	@GetMapping()	
+
+	@GetMapping()
 	public ResponseEntity<List<User>> findAll() {
-		
+
 		List<User> user = this.userService.buscarTodos();
-		
+
 		//http status code=200
 		return ResponseEntity.ok(user);
 	}
-	
+
+	@Operation(summary = "Create a new User", 
+			tags = { "users", "post" })
+	@ApiResponses({
+			@ApiResponse(responseCode = "201", content = {
+					@Content(schema = @Schema(implementation = UserResponseDTO.class), mediaType = "application/json") }),
+			@ApiResponse(responseCode = "500", content = { @Content(schema = @Schema()) }) })
 	@PostMapping()
 	//@PreAuthorize(value = "hasRole('ROLE_ADMIN')")
 	@PreAuthorize(value = "hasAuthority('ROLE_ADMIN')")
-	public ResponseEntity<UserResponseDTO> createUser(
-			@RequestBody UserRequestDTO request
-		)  {
-		
+	public ResponseEntity<UserResponseDTO> createUser(@RequestBody UserRequestDTO request) {
+
 		//verifico si existe
 		User user = this.userService.buscarUserPorUsername(request.getUsername());
 		if(user != null) {
@@ -111,41 +134,44 @@ public class UserController {
 		
 		return ResponseEntity.ok(response);
 	}
-	
+
+	@Operation(summary = "Delete a Users by Id", 
+			tags = { "users", "delete" })
+	@ApiResponses({ @ApiResponse(responseCode = "204", content = { @Content(schema = @Schema()) }),
+			@ApiResponse(responseCode = "500", content = { @Content(schema = @Schema()) }) })
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> borrarUser(
-			@PathVariable("id") Long id
-			){
+	public ResponseEntity<Void> borrarUser(@PathVariable("id") Long id){
 		this.userService.eliminarUser(id);
 		return ResponseEntity.ok().build();
 	}
-	
-	/*user/1
-	{
-	  alias:"nuevoalias"
-		id:2
-	}
-	*/
-	
+
+	@Operation(summary = "Update a User by Id", tags = { "users", "put" })
+	@ApiResponses({ @ApiResponse(responseCode = "200", content = {
+			@Content(schema = @Schema(implementation = UserRequestPutDTO.class), mediaType = "application/json") }),
+			@ApiResponse(responseCode = "500", content = { @Content(schema = @Schema()) }),
+			@ApiResponse(responseCode = "404", content = { @Content(schema = @Schema()) }) })
+	/*
+	 * Idempotentes user/1 { alias: 'nuevoalias' id: 2 }
+	 */
 	@PutMapping("/{id}")
 	public ResponseEntity<UserRequestPutDTO> actualizarPorPut(
 			@PathVariable(name="id", required = true) Long id,
-			@Validated @RequestBody UserRequestPutDTO request 
-		) {
-		
+			@Validated @RequestBody UserRequestPutDTO request) 
+	{
+
 		User user = this.userService.buscarUser(id);
 		if(!user.getId().equals(request.getId())) {
 			return ResponseEntity.badRequest().build();
 		}
-		
+
 		user.setPassword(request.getPassword());
 		//otros atributos en base al request
-		
+
 		this.userService.actualizar(user);
-		
+
 		return ResponseEntity.ok().build();
 	}
-	
+
 	//path!		
-	
+
 }
